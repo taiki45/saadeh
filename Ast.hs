@@ -1,5 +1,5 @@
 module Ast
-    ( Exp
+    ( Expr
         ( NumLit
         , StrLit
         , Identifier
@@ -10,20 +10,19 @@ module Ast
 
 import Data.List
 
-data Exp = NumLit Int
-         | StrLit String
-         | Identifier String
-         | FuncCall FuncName Args
-instance Show Exp where
+data Expr = NumLit Int
+          | StrLit String
+          | Identifier String
+          | FuncCall FuncName Args
+instance Show Expr where
         show (NumLit x) = show x
         show (StrLit s) = "\"" ++ s ++ "\"@"
         show (Identifier s) = "(Identifier " ++ show s ++ ")"
         show (FuncCall n args) = "(FuncCall " ++ n ++ " [" ++ showArgs ++ "]" ++ ")"
-             where
-                 showArgs = intercalate ", " . (fmap show) $ args
+             where showArgs = intercalate ", " . (fmap show) $ args
 
-type Args = [Exp]
+type Args = [Expr]
 type FuncName = String
 
-data Define = Define String Exp
+data Define = Define String Expr
             deriving Show

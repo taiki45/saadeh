@@ -5,16 +5,14 @@ import Control.Applicative ((*>), (<*), (<**>), (<$>), (<*>), pure)
 import Text.ParserCombinators.Parsec
 import Ast
 
---TODO: remove parenth: puts exp exp exp
-
-numberLit :: Parser Exp
+numberLit :: Parser Expr
 numberLit = many1 digit <**> (pure $ NumLit . read)
 
-strLit :: Parser Exp
+strLit :: Parser Expr
 strLit = StrLit <$> between quote quote (many $ noneOf "\"")
                 where quote = (char '"')
 
-literal :: Parser Exp
+literal :: Parser Expr
 literal = numberLit <|> strLit
 
 symbol :: Parser Char
@@ -23,12 +21,12 @@ symbol = oneOf "!$%^&*-_+|?<>:"
 identifier :: Parser String
 identifier = pure (++) <*> pure <$> letter <*> many (alphaNum <|> symbol)
 
-funcCall :: Parser Exp
+funcCall :: Parser Expr
 funcCall = pure FuncCall <*> identifier <*> option [] (parseArgs <|> parseArgs')
             where parseArgs  = try $ spaces *> sepBy1 exp space
                   parseArgs' = try $ manyTill (space *> exp) (try $ lookAhead $ spaces *> identifier <* spaces <* char '=')
 
-exp :: Parser Exp
+exp :: Parser Expr
 exp = literal <|> Identifier <$> identifier
 
 definition :: Parser Define
