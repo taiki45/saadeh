@@ -2,18 +2,17 @@ module Parser
     () where
 
 import Prelude hiding (exp)
+import Control.Applicative ((*>), (<*), (<**>), (<$>), (<*>), pure)
 import Text.ParserCombinators.Parsec
 import Ast
 
---TODO: use <$ and $>
 --TODO: remove parenth: puts exp exp exp
 
 numberLit :: Parser Exp
-numberLit = many1 digit >>= return . NumLit . read
+numberLit =  many1 digit <**> (pure $ NumLit . read)
 
 strLit :: Parser Exp
-strLit = between quote quote (many $ noneOf "\"")
-            >>= return . StrLit
+strLit = StrLit <$> between quote quote (many $ noneOf "\"")
                 where quote = (char '"')
 
 literal :: Parser Exp
@@ -23,23 +22,14 @@ symbol :: Parser Char
 symbol = oneOf "!$%^&*-_+|?<>:"
 
 identifier :: Parser Identifier
-identifier = do c <- letter
-                rest <- many $ alphaNum <|> symbol
-                return $ [c] ++ rest
+identifier = pure (++) <*> pure <$> letter <*> many (alphaNum <|> symbol)
 
 funcCall :: Parser Exp
-funcCall = do name <- identifier
-              args <- option [] parseArgs
-              return $ FuncCall name args
+funcCall = pure FuncCall <*> identifier <*> option [] parseArgs
                 where open = char '('
                       close = char ')'
-                      parseArgs = try (do spaces
-                                          a <- between open close $ sepBy1 exp spaces
-                                          spaces
-                                          return a)
+                      parseArgs = try $ spaces *> between open close (sepBy1 exp spaces) <* spaces
 
 exp :: Parser Exp
-exp = do optional spaces
-         e <- literal <|> funcCall
-         optional spaces
-         return e
+exp = ignoreSpaces *> literal <|> funcCall <* ignoreSpaces
+        where ignoreSpaces = optional spaces
