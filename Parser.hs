@@ -24,6 +24,9 @@ symbol = oneOf "!$%^&*-_+|?<>:"
 identifier :: Parser String
 identifier = pure (++) <*> pure <$> letter <*> many (alphaNum <|> symbol)
 
+definition :: Parser Exp
+definition = pure Define <*> identifier <* spaces <* char '=' <* spaces <*> exp
+
 funcCall :: Parser Exp
 funcCall = pure FuncCall <*> identifier <*> option [] parseArgs
                 where parseArgs = try $ spaces *> sepBy1 exp spaces <* spaces
