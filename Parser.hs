@@ -9,7 +9,7 @@ import Ast
 --TODO: remove parenth: puts exp exp exp
 
 numberLit :: Parser Exp
-numberLit =  many1 digit <**> (pure $ NumLit . read)
+numberLit = many1 digit <**> (pure $ NumLit . read)
 
 strLit :: Parser Exp
 strLit = StrLit <$> between quote quote (many $ noneOf "\"")
@@ -21,15 +21,12 @@ literal = numberLit <|> strLit
 symbol :: Parser Char
 symbol = oneOf "!$%^&*-_+|?<>:"
 
-identifier :: Parser Identifier
+identifier :: Parser String
 identifier = pure (++) <*> pure <$> letter <*> many (alphaNum <|> symbol)
 
 funcCall :: Parser Exp
 funcCall = pure FuncCall <*> identifier <*> option [] parseArgs
-                where open = char '('
-                      close = char ')'
-                      parseArgs = try $ spaces *> between open close (sepBy1 exp spaces) <* spaces
+                where parseArgs = try $ spaces *> sepBy1 exp spaces <* spaces
 
 exp :: Parser Exp
-exp = ignoreSpaces *> literal <|> funcCall <* ignoreSpaces
-        where ignoreSpaces = optional spaces
+exp = literal <|> Identifier <$> identifier <|> funcCall
