@@ -1,7 +1,7 @@
-module Parser (parser) where
+module Parser (readProgram) where
 
 import Prelude hiding (exp)
-import Control.Applicative ((*>), (<*), (<**>), (<$>), (<*>), pure)
+import Control.Applicative ((*>), (<*), (<**>), (<$>), (<$), (<*>), pure)
 import Text.ParserCombinators.Parsec
 import Ast
 
@@ -29,11 +29,16 @@ funcCall = pure FuncCall <*> identifier <*> option [] (parseArgs <|> parseArgs')
 exp :: Parser Expr
 exp = literal <|> Identifier <$> identifier
 
-definition :: Parser Define
-definition = pure Define <*> identifier <* spaces <* char '=' <* spaces <*> (funcCall <|> exp)
+definition :: Parser Lambda
+definition = pure Lambda
+                <*> identifier
+                <*> (try parseParams <|> (spaces *> equal))
+                <*> (funcCall <|> exp)
+             where parseParams = manyTill (spaces *> identifier <* spaces) equal
+                   equal = try $ [] <$ (char '=' <* spaces)
 
-program :: Parser [Define]
+program :: Parser [Lambda]
 program = sepBy definition $ skipMany1 newline
 
-parser :: Parser [Define]
-parser = program
+readProgram :: String -> Either ParseError [Lambda]
+readProgram i = parse program "Saadeh" i
