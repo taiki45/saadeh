@@ -1,10 +1,24 @@
-module Evaluator
-    ( toMap ) where
+module Evaluator (start) where
 
 import Control.Applicative
 import Control.Monad.State
 import qualified Data.Map as M
 import Ast
+
+-- @test
+-- TODO: funccall with Identifier
+--       FuncCall Expr Expr
+--       if Expr is non Funcation in apply,
+--          raise an error.
+testLambdas :: [Lambda]
+testLambdas = [(Lambda "main" [] (FuncCall "f" [(Identifier "g"), (NumLit 3)]))
+              ,(Lambda "f" ["a", "x"] (FuncCall "a" [(Identifier "x")]))
+              ,(Lambda "g" ["b"] (Identifier "b"))
+              ]
+
+-- @test
+numLits :: [Expr]
+numLits = (NumLit 3):numLits
 
 primEnv :: M.Map String Lambda
 primEnv = M.fromList []
