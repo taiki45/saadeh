@@ -1,9 +1,9 @@
 module Evaluator
     ( toMap ) where
 
+import Control.Applicative
 import Control.Monad.State
 import qualified Data.Map as M
-import Data.List (findIndex)
 import Ast
 
 primEnv :: M.Map String Lambda
@@ -48,8 +48,11 @@ apply (Lambda n _ e@(FuncCall f [])) _ = return e
 apply (Lambda n param (FuncCall f arg)) arg' =
         apply (Lambda n [] (FuncCall f (fmap replace arg))) []
             where replace e@(Identifier i) = if elem i param
-                                                 then let (Just pos) = findIndex (== i) param
-                                                          in arg' !! pos
+                                                 then let l = getZipList $
+                                                                pure (,)
+                                                                <*> ZipList param
+                                                                <*> ZipList arg'
+                                                        in (snd . head) . filter ((== i) . fst) $ l
                                                  else e
                   replace e = e
 
