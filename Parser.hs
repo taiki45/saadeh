@@ -24,7 +24,7 @@ identifier = pure (++) <*> pure <$> letter <*> many (alphaNum <|> symbol)
 funcCall :: Parser Expr
 funcCall = pure FuncCall <*> identifier <*> option [] (parseArgs <|> parseArgs')
             where parseArgs  = try $ spaces *> sepBy1 exp space
-                  parseArgs' = try $ manyTill (space *> exp) (try $ lookAhead $ spaces *> identifier <* spaces <* char '=')
+                  parseArgs' = try $ manyTill (space *> exp) newline
 
 exp :: Parser Expr
 exp = literal <|> Identifier <$> identifier
@@ -33,12 +33,12 @@ definition :: Parser Lambda
 definition = pure Lambda
                 <*> identifier
                 <*> (try parseParams <|> (spaces *> equal))
-                <*> (funcCall <|> exp)
+                <*> funcCall
              where parseParams = manyTill (spaces *> identifier <* spaces) equal
                    equal = try $ [] <$ (char '=' <* spaces)
 
 program :: Parser [Lambda]
-program = sepBy definition $ skipMany1 newline
+program = endBy definition $ skipMany newline
 
 readProgram :: String -> Either ParseError [Lambda]
 readProgram i = parse program "Saadeh" i

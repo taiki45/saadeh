@@ -40,9 +40,6 @@ eval :: Lambda -> M.Map String Lambda -> Maybe Expr
 eval (Lambda _ ps e) m = case e of
                              a@(NumLit _) -> return a
                              a@(StrLit _) -> return a
-                             (Identifier i) -> let md = findDef i m
-                                                   in md >>= (\d ->
-                                                        eval d m)
                              (FuncCall i as) -> let pd = findDef i primEnv
                                                     md = findDef i m
                                                     in case pd of
@@ -55,12 +52,11 @@ apply :: Lambda -> [Expr] -> Maybe Expr
 apply (Lambda _ [] e) [] = return e
 apply (Lambda _ _ e@(NumLit _)) _ = return e
 apply (Lambda _ _ e@(StrLit _)) _ = return e
-apply (Lambda n param@(p:ps) e@(Identifier i)) arg@(a:as) = if p == i
+apply (Lambda n param@(p:ps) e@(FuncCall i [])) arg@(a:as) = if p == i
                                                                 then return a
                                                                 else apply (Lambda n ps e) as
-apply (Lambda n _ e@(FuncCall f [])) _ = return e
 apply (Lambda n param (FuncCall f arg)) arg' =
-        apply (Lambda n [] (FuncCall f (fmap replace arg))) []
+        apply (Lambda n [] (FuncCall (replaceFunc f) (fmap replace arg))) []
             where replace e@(Identifier i) = if elem i param
                                                  then let l = getZipList $
                                                                 pure (,)
@@ -69,6 +65,11 @@ apply (Lambda n param (FuncCall f arg)) arg' =
                                                         in (snd . head) . filter ((== i) . fst) $ l
                                                  else e
                   replace e = e
+                  replaceFunc name = if elem name param
+                                         then let l = zip param arg'
+                                                  in (takeName . snd . head) . filter ((== name) . fst) $ l
+                                         else name
+                  takeName (Identifier i) = i
 
 applyPrim :: Lambda -> [Expr] -> Maybe Expr
 applyPrim = undefined

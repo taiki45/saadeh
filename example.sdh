@@ -1,0 +1,5 @@
+main = f g 3
+
+f h x = h x
+
+g y = y

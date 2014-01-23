@@ -1,12 +1,15 @@
+import Control.Applicative ((<$>))
+import System.Environment (getArgs)
 import Ast
 import Evaluator
 import Parser
 
 main :: IO ()
-main = do s <- getContents
-          let r = f s
-              m = toMap r in
-              putStrLn . show $ m
+main = do fpath <- head <$> getArgs
+          code <- readFile fpath
+          let defines = f code
+              result = start defines
+              in putStrLn . show $ result
 
 f :: String -> [Lambda]
 f i = case readProgram i of
