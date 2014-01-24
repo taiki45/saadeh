@@ -27,7 +27,11 @@ type Args = [Expr]
 type FuncName = String
 
 data Lambda = Lambda Name Params Expr
-            deriving Show
+            | Primitive Name Body
+instance Show Lambda where
+        show (Lambda s ps e) = intercalate " " ["(Lambda", s, show ps, show e, ")"]
+        show (Primitive s _) = "(Primitive " ++ s ++ ")"
 
 type Name = String
 type Params = [String]
+type Body = [Expr] -> Expr

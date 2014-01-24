@@ -1,27 +1,10 @@
 module Evaluator (start) where
 
-import Control.Applicative
-import Control.Monad.State
 import qualified Data.Map as M
 import Ast
 
--- @test
--- TODO: funccall with Identifier
---       FuncCall Expr Expr
---       if Expr is non Funcation in apply,
---          raise an error.
-testLambdas :: [Lambda]
-testLambdas = [(Lambda "main" [] (FuncCall "f" [(Identifier "g"), (NumLit 3)]))
-              ,(Lambda "f" ["a", "x"] (FuncCall "a" [(Identifier "x")]))
-              ,(Lambda "g" ["b"] (Identifier "b"))
-              ]
-
--- @test
-numLits :: [Expr]
-numLits = (NumLit 3):numLits
-
 primEnv :: M.Map String Lambda
-primEnv = M.fromList []
+primEnv = M.fromList primitives
 
 toMap :: [Lambda] -> M.Map String Lambda
 toMap = M.fromList . (fmap f)
@@ -37,7 +20,7 @@ findDef :: String -> M.Map String Lambda -> Maybe Lambda
 findDef s m = M.lookup s m
 
 eval :: Lambda -> M.Map String Lambda -> Maybe Expr
-eval (Lambda _ ps e) m = case e of
+eval (Lambda _ _ e) m = case e of
                              a@(NumLit _) -> return a
                              a@(StrLit _) -> return a
                              (FuncCall i as) -> let pd = findDef i primEnv
@@ -52,17 +35,13 @@ apply :: Lambda -> [Expr] -> Maybe Expr
 apply (Lambda _ [] e) [] = return e
 apply (Lambda _ _ e@(NumLit _)) _ = return e
 apply (Lambda _ _ e@(StrLit _)) _ = return e
-apply (Lambda n param@(p:ps) e@(FuncCall i [])) arg@(a:as) = if p == i
-                                                                then return a
-                                                                else apply (Lambda n ps e) as
+apply (Lambda n (p:ps) e@(FuncCall i [])) (a:as) = if p == i
+                                                    then return a
+                                                    else apply (Lambda n ps e) as
 apply (Lambda n param (FuncCall f arg)) arg' =
         apply (Lambda n [] (FuncCall (replaceFunc f) (fmap replace arg))) []
             where replace e@(Identifier i) = if elem i param
-                                                 then let l = getZipList $
-                                                                pure (,)
-                                                                <*> ZipList param
-                                                                <*> ZipList arg'
-                                                        in (snd . head) . filter ((== i) . fst) $ l
+                                                 then (snd . head) . filter ((== i) . fst) $ zip param arg'
                                                  else e
                   replace e = e
                   replaceFunc name = if elem name param
@@ -73,3 +52,6 @@ apply (Lambda n param (FuncCall f arg)) arg' =
 
 applyPrim :: Lambda -> [Expr] -> Maybe Expr
 applyPrim = undefined
+
+primitives :: [(String, Lambda)]
+primitives = []
