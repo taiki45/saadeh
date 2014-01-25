@@ -9,7 +9,7 @@ numberLit :: Parser Expr
 numberLit = many1 digit <**> (pure $ Number . read)
 
 strLit :: Parser Expr
-strLit = StrLit <$> between quote quote (many $ noneOf "\"")
+strLit = String <$> between quote quote (many $ noneOf "\"")
                 where quote = (char '"')
 
 literal :: Parser Expr

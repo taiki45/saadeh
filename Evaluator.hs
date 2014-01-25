@@ -22,7 +22,7 @@ findDef s m = M.lookup s m
 eval :: Lambda -> M.Map String Lambda -> Maybe Expr
 eval (Lambda _ _ e) m = case e of
                              a@(Number _) -> return a
-                             a@(StrLit _) -> return a
+                             a@(String _) -> return a
                              (FuncCall i as) -> let pd = findDef i primEnv
                                                     md = findDef i m
                                                     in case pd of
@@ -34,7 +34,7 @@ eval (Lambda _ _ e) m = case e of
 apply :: Lambda -> [Expr] -> Maybe Expr
 apply (Lambda _ [] e) [] = return e
 apply (Lambda _ _ e@(Number _)) _ = return e
-apply (Lambda _ _ e@(StrLit _)) _ = return e
+apply (Lambda _ _ e@(String _)) _ = return e
 apply (Lambda n (p:ps) e@(FuncCall i [])) (a:as) = if p == i
                                                     then return a
                                                     else apply (Lambda n ps e) as

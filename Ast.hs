@@ -1,7 +1,7 @@
 module Ast
     ( Expr
         ( Number -- TODO: Number
-        , StrLit
+        , String
         , Identifier
         , FuncCall )
     , Args
@@ -12,13 +12,13 @@ module Ast
 import Data.List
 
 data Expr = Number Int
-          | StrLit String
+          | String String
           | Identifier String
           | FuncCall FuncName Args
           deriving Eq
 instance Show Expr where
         show (Number x) = show x
-        show (StrLit s) = "\"" ++ s ++ "\"@"
+        show (String s) = "\"" ++ s ++ "\"@"
         show (Identifier s) = "(Identifier " ++ show s ++ ")"
         show (FuncCall n args) = "(FuncCall " ++ n ++ " [" ++ showArgs ++ "]" ++ ")"
              where showArgs = intercalate ", " . (fmap show) $ args
