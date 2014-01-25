@@ -3,7 +3,7 @@
 
 **saadeh** is pure functional language written in Haskell.
 
-saadeh is an persian word which means simple.
+ _ساده_ is an persian word which is read as saadeh and means _simple_.
 
 saadeh has:
 
