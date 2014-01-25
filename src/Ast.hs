@@ -1,6 +1,6 @@
 module Ast
     ( Expr
-        ( Number -- TODO: Number
+        ( Number
         , String
         , Identifier
         , FuncCall )
