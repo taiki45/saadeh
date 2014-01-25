@@ -1,6 +1,6 @@
 module Ast
     ( Expr
-        ( NumLit -- TODO: Number
+        ( Number -- TODO: Number
         , StrLit
         , Identifier
         , FuncCall )
@@ -11,13 +11,13 @@ module Ast
 
 import Data.List
 
-data Expr = NumLit Int
+data Expr = Number Int
           | StrLit String
           | Identifier String
           | FuncCall FuncName Args
           deriving Eq
 instance Show Expr where
-        show (NumLit x) = show x
+        show (Number x) = show x
         show (StrLit s) = "\"" ++ s ++ "\"@"
         show (Identifier s) = "(Identifier " ++ show s ++ ")"
         show (FuncCall n args) = "(FuncCall " ++ n ++ " [" ++ showArgs ++ "]" ++ ")"

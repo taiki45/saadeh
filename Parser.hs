@@ -6,7 +6,7 @@ import Text.ParserCombinators.Parsec
 import Ast
 
 numberLit :: Parser Expr
-numberLit = many1 digit <**> (pure $ NumLit . read)
+numberLit = many1 digit <**> (pure $ Number . read)
 
 strLit :: Parser Expr
 strLit = StrLit <$> between quote quote (many $ noneOf "\"")
