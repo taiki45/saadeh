@@ -1,4 +1,13 @@
-module Parser (readProgram) where
+module Parser
+    ( readProgram
+    , program
+    , definition
+    , funcCall
+    , exp
+    , identifier
+    , strLit
+    , numberLit
+    ) where
 
 import Prelude hiding (exp)
 import Control.Applicative ((*>), (<*), (<**>), (<$>), (<$), (<*>), pure)

@@ -3,7 +3,9 @@ where
 
 import Test.Hspec
 import Control.Arrow (left)
+import Text.ParserCombinators.Parsec (parse, Parser)
 
+import Ast
 import Parser
 
 main :: IO ()
