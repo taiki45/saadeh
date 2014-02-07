@@ -1,5 +1,6 @@
 module Evaluator (start) where
 
+import Control.Monad
 import qualified Data.Map as M
 import Ast
 
@@ -20,16 +21,12 @@ findDef :: String -> M.Map String Lambda -> Maybe Lambda
 findDef s m = M.lookup s m
 
 eval :: Lambda -> M.Map String Lambda -> Maybe Expr
-eval (Lambda _ _ e) m = case e of
+eval (Lambda _ _ e) env = case e of
                              a@(Number _) -> return a
                              a@(String _) -> return a
-                             (FuncCall i as) -> let pd = findDef i primEnv
-                                                    md = findDef i m
-                                                    in case pd of
-                                                        (Just d) -> applyPrim d as
-                                                        Nothing -> do d <- md
-                                                                      r <- apply d as
-                                                                      eval (Lambda "" [] r) m
+                             (FuncCall i as) -> do d <- msum [findDef i primEnv, findDef i env]
+                                                   r <- apply d as
+                                                   eval (Lambda "" [] r) env
 
 apply :: Lambda -> [Expr] -> Maybe Expr
 apply (Lambda _ [] e) [] = return e
@@ -50,8 +47,8 @@ apply (Lambda n param (FuncCall f arg)) arg' =
                                          else name
                   takeName (Identifier i) = i
 
-applyPrim :: Lambda -> [Expr] -> Maybe Expr
-applyPrim = undefined
+--applyPrim :: Lambda -> [Expr] -> Maybe Expr
+--applyPrim = undefined
 
 primitives :: [(String, Lambda)]
 primitives = []
