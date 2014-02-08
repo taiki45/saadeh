@@ -7,6 +7,7 @@ module Ast
     , Args
     , Params
     , Lambda (Lambda)
+    , isLiteral
     ) where
 
 import Data.List
@@ -22,6 +23,11 @@ instance Show Expr where
         show (Identifier s) = "(Identifier " ++ show s ++ ")"
         show (FuncCall n args) = "(FuncCall " ++ n ++ " [" ++ showArgs ++ "]" ++ ")"
              where showArgs = intercalate ", " . (fmap show) $ args
+
+isLiteral :: Expr -> Bool
+isLiteral (Number _) = True
+isLiteral (String _) = True
+isLiteral _ = False
 
 type Args = [Expr]
 type FuncName = String

@@ -1,5 +1,6 @@
 module Evaluator (start) where
 
+import Control.Applicative
 import Control.Monad
 import qualified Data.Map as M
 import Ast
@@ -7,26 +8,24 @@ import Ast
 primEnv :: M.Map String Lambda
 primEnv = M.fromList primitives
 
+-- TODO: Lens
 toMap :: [Lambda] -> M.Map String Lambda
 toMap = M.fromList . (fmap f)
         where f d@(Lambda s _ _) = (s, d)
 
+-- TODO: use Reader
 start :: [Lambda] -> Maybe Expr
-start ds = let m = toMap ds
-               mDef = findDef "main" m in
-                  do d <- mDef
-                     eval d m
+start ds = let env = toMap ds
+            in join $ flip eval env <$> findDef "main" env
 
 findDef :: String -> M.Map String Lambda -> Maybe Lambda
 findDef s m = M.lookup s m
 
 eval :: Lambda -> M.Map String Lambda -> Maybe Expr
-eval (Lambda _ _ e) env = case e of
-                             a@(Number _) -> return a
-                             a@(String _) -> return a
-                             (FuncCall i as) -> do d <- msum [findDef i primEnv, findDef i env]
-                                                   r <- apply d as
-                                                   eval (Lambda "" [] r) env
+eval (Lambda _ _ expr) _ | isLiteral expr = return expr
+eval (Lambda _ _ (FuncCall i args)) env = do d <- msum [findDef i primEnv, findDef i env]
+                                             expr <- apply d args
+                                             eval (Lambda "" [] expr) env
 
 apply :: Lambda -> [Expr] -> Maybe Expr
 apply (Lambda _ [] e) [] = return e
